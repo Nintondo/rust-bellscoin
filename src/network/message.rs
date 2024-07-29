@@ -425,12 +425,6 @@ mod test {
     use super::{RawNetworkMessage, NetworkMessage, CommandString};
     use network::constants::ServiceFlags;
     use consensus::encode::{deserialize, deserialize_partial, serialize};
-    use hashes::sha256d::Hash;
-    use hashes::Hash as HashTrait;
-
-    fn hash(slice: [u8;32]) -> Hash {
-        Hash::from_slice(&slice).unwrap()
-    }
 
     #[test]
     fn commandstring_test() {
