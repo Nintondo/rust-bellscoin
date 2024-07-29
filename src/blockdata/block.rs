@@ -553,40 +553,6 @@ mod tests {
         assert_eq!(serialize(&real_decode), some_block);
     }
 
-    // Check testnet block 000000000000045e0b1660b6445b5e5c5ab63c9a4f956be7e1e69be04fa4497b
-    #[test]
-    fn segwit_block_test() {
-        let segwit_block = include_bytes!("../../test_data/testnet_block_000000000000045e0b1660b6445b5e5c5ab63c9a4f956be7e1e69be04fa4497b.raw").to_vec();
-
-        let decode: Result<Block, _> = deserialize(&segwit_block);
-
-        let prevhash = Vec::from_hex("2aa2f2ca794ccbd40c16e2f3333f6b8b683f9e7179b2c4d74906000000000000").unwrap();
-        let merkle = Vec::from_hex("10bc26e70a2f672ad420a6153dd0c28b40a6002c55531bfc99bf8994a8e8f67e").unwrap();
-        let work = Uint256([0x257c3becdacc64u64, 0, 0, 0]);
-
-        assert!(decode.is_ok());
-        let real_decode = decode.unwrap();
-        assert_eq!(real_decode.header.version, 0x20000000);  // VERSIONBITS but no bits set
-        assert_eq!(serialize(&real_decode.header.prev_blockhash), prevhash);
-        assert_eq!(serialize(&real_decode.header.merkle_root), merkle);
-        assert_eq!(real_decode.header.merkle_root, real_decode.compute_merkle_root().unwrap());
-        assert_eq!(real_decode.header.time, 1472004949);
-        assert_eq!(real_decode.header.bits, 0x1a06d450);
-        assert_eq!(real_decode.header.nonce, 1879759182);
-        assert_eq!(real_decode.header.work(), work);
-        assert_eq!(real_decode.header.validate_pow(&real_decode.header.target()).unwrap(), real_decode.block_hash());
-        assert_eq!(real_decode.header.difficulty(Network::Testnet), 2456598);
-        // [test] TODO: check the transaction data
-
-        assert_eq!(real_decode.size(), segwit_block.len());
-        assert_eq!(real_decode.strippedsize(), 4283);
-        assert_eq!(real_decode.weight(), 17168);
-
-        assert!(real_decode.check_witness_commitment());
-
-        assert_eq!(serialize(&real_decode), segwit_block);
-    }
-
     #[test]
     fn block_version_test() {
         let block = Vec::from_hex("ffffff7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").unwrap();

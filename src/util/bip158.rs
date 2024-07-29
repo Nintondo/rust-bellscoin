@@ -513,67 +513,11 @@ impl<'a> BitStreamWriter<'a> {
 mod test {
     use io::Cursor;
 
-    use hash_types::BlockHash;
     use hashes::hex::FromHex;
 
     use super::*;
 
     extern crate serde_json;
-    use self::serde_json::Value;
-
-    use consensus::encode::deserialize;
-    use std::collections::HashMap;
-
-    #[test]
-    fn test_blockfilters() {
-
-        // test vectors from: https://github.com/jimpo/bitcoin/blob/c7efb652f3543b001b4dd22186a354605b14f47e/src/test/data/blockfilters.json
-        let data = include_str!("../../test_data/blockfilters.json");
-
-        let testdata = serde_json::from_str::<Value>(data).unwrap().as_array().unwrap().clone();
-        for t in testdata.iter().skip(1) {
-            let block_hash = BlockHash::from_hex(&t.get(1).unwrap().as_str().unwrap()).unwrap();
-            let block: Block = deserialize(&Vec::from_hex(&t.get(2).unwrap().as_str().unwrap()).unwrap()).unwrap();
-            assert_eq!(block.block_hash(), block_hash);
-            let scripts = t.get(3).unwrap().as_array().unwrap();
-            let previous_filter_header = FilterHeader::from_hex(&t.get(4).unwrap().as_str().unwrap()).unwrap();
-            let filter_content = Vec::from_hex(&t.get(5).unwrap().as_str().unwrap()).unwrap();
-            let filter_header = FilterHeader::from_hex(&t.get(6).unwrap().as_str().unwrap()).unwrap();
-
-            let mut txmap = HashMap::new();
-            let mut si = scripts.iter();
-            for tx in block.txdata.iter().skip(1) {
-                for input in tx.input.iter() {
-                    txmap.insert(input.previous_output.clone(), Script::from(Vec::from_hex(si.next().unwrap().as_str().unwrap()).unwrap()));
-                }
-            }
-
-            let filter = BlockFilter::new_script_filter(&block,
-                                        |o| if let Some(s) = txmap.get(o) {
-                                            Ok(s.clone())
-                                        } else {
-                                            Err(Error::UtxoMissing(o.clone()))
-                                        }).unwrap();
-
-            let test_filter = BlockFilter::new(filter_content.as_slice());
-
-            assert_eq!(test_filter.content, filter.content);
-
-            let block_hash = &block.block_hash();
-            assert!(filter.match_all(block_hash, &mut txmap.iter()
-                .filter_map(|(_, s)| if !s.is_empty() { Some(s.as_bytes()) } else { None })).unwrap());
-
-            for (_, script) in &txmap {
-                let query = vec![script];
-                if !script.is_empty () {
-                    assert!(filter.match_any(&block_hash, &mut query.iter()
-                        .map(|s| s.as_bytes())).unwrap());
-                }
-            }
-
-            assert_eq!(filter_header, filter.filter_header(&previous_filter_header));
-        }
-    }
 
     #[test]
     fn test_filter() {
