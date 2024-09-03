@@ -320,6 +320,16 @@ impl Script {
     /// Creates a new empty script.
     pub fn new() -> Script { Script(vec![].into_boxed_slice()) }
 
+    /// Treat byte slice as `Script`
+    #[inline]
+    pub fn from_bytes(bytes: &[u8]) -> &Script {
+        // SAFETY: copied from `std`
+        // The pointer was just created from a reference which is still alive.
+        // Casting slice pointer to a transparent struct wrapping that slice is sound (same
+        // layout).
+        unsafe { &*(bytes as *const [u8] as *const Script) }
+    }
+
     /// Generates P2PK-type of scriptPubkey.
     pub fn new_p2pk(pubkey: &PublicKey) -> Script {
         Builder::new()
@@ -1517,4 +1527,3 @@ mod test {
         assert!(read_scriptbool(&v));
     }
 }
-

@@ -12,6 +12,9 @@ use VarInt;
 #[cfg(feature = "serde")]
 use serde;
 
+use crate::util::taproot::TAPROOT_ANNEX_PREFIX;
+use crate::Script;
+
 /// The Witness is the data used to unlock bitcoins since the [segwit upgrade](https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki)
 ///
 /// Can be logically seen as an array of byte-arrays `Vec<Vec<u8>>` and indeed you can convert from
@@ -38,6 +41,12 @@ pub struct Witness {
     /// If `witness_elements > 1` it's a valid index pointing to the second-to-last witness element in `content`
     /// (Including the varint specifying the length of the element)
     second_to_last: usize,
+
+    /// This is the valid index pointing to the beginning of the index area.
+    ///
+    /// Said another way, this is the total length of all witness elements serialized (without the
+    /// element count but with their sizes serialized as compact size).
+    indices_start: usize,
 }
 
 /// Support structure to allow efficient and convenient iteration over the Witness elements
@@ -95,6 +104,7 @@ impl Decodable for Witness {
                 witness_elements,
                 last,
                 second_to_last,
+                indices_start: cursor
             })
         }
     }
@@ -155,6 +165,7 @@ impl Witness {
             content,
             last,
             second_to_last,
+            indices_start: cursor
         }
     }
 
@@ -226,6 +237,46 @@ impl Witness {
         }
     }
 
+    /// Return the nth element in the witness, if any
+    pub fn nth(&self, n: usize) -> Option<&[u8]> {
+        if n >= self.witness_elements {
+            return None;
+        }
+
+        let mut index = 0;
+        for _ in 0..n {
+            let varint = VarInt::consensus_decode(&self.content[index..]).ok()?;
+            index += varint.len() + varint.0 as usize;
+        }
+
+        self.element_at(index)
+        // let pos = decode_cursor(&self.content, self.last - self.second_to_last, index)?;
+        // self.element_at(pos)
+    }
+
+    /// Get Tapscript following BIP341 rules regarding accounting for an annex.
+    ///
+    /// This does not guarantee that this represents a P2TR [`Witness`]. It
+    /// merely gets the second to last or third to last element depending on
+    /// the first byte of the last element being equal to 0x50.
+    ///
+    /// See [`Script::is_p2tr`] to check whether this is actually a Taproot witness.
+    pub fn tapscript(&self) -> Option<&Script> {
+        self.last().and_then(|last| {
+            // From BIP341:
+            // If there are at least two witness elements, and the first byte of
+            // the last element is 0x50, this last element is called annex a
+            // and is removed from the witness stack.
+            if self.len() >= 3 && last.first() == Some(&TAPROOT_ANNEX_PREFIX) {
+                self.nth(self.len() - 3).map(Script::from_bytes)
+            } else if self.len() >= 2 {
+                self.nth(self.len() - 2).map(Script::from_bytes)
+            } else {
+                None
+            }
+        })
+    }
+
     /// Return the second-to-last element in the witness, if any
     pub fn second_to_last(&self) -> Option<&[u8]> {
         if self.witness_elements <= 1 {
@@ -245,6 +296,7 @@ impl Default for Witness {
             witness_elements: 0,
             last: 0,
             second_to_last: 0,
+            indices_start: 0
         }
     }
 }
@@ -294,6 +346,8 @@ mod test {
     use hashes::hex::{FromHex, ToHex};
     use Transaction;
 
+    use crate::Script;
+
     #[test]
     fn test_push() {
         let mut witness = Witness::default();
@@ -305,6 +359,7 @@ mod test {
             content: vec![1u8, 0],
             last: 0,
             second_to_last: 0,
+            indices_start: 0
         };
         assert_eq!(witness, expected);
         assert_eq!(witness.last(), Some(&[0u8][..]));
@@ -315,6 +370,7 @@ mod test {
             content: vec![1u8, 0, 2, 2, 3],
             last: 2,
             second_to_last: 0,
+            indices_start: 0
         };
         assert_eq!(witness, expected);
         assert_eq!(witness.last(), Some(&[2u8, 3u8][..]));
@@ -334,6 +390,7 @@ mod test {
             witness_elements: 2,
             last: 34,
             second_to_last: 0,
+            indices_start: 0
         };
         for (i, el) in witness.iter().enumerate() {
             assert_eq!(witness_vec[i], el);
@@ -390,5 +447,26 @@ mod test {
 
         let back = serde_json::from_str(&new).unwrap();
         assert_eq!(new_witness_format, back);
+    }
+
+    #[test]
+    fn test_get_tapscript() {
+        let tapscript = Vec::from_hex("deadbeef").unwrap();
+        let control_block = Vec::from_hex("02").unwrap();
+        // annex starting with 0x50 causes the branching logic.
+        let annex = Vec::from_hex("50").unwrap();
+
+        let witness_vec = vec![tapscript.clone(), control_block.clone()];
+        let witness_vec_annex = vec![tapscript.clone(), control_block, annex];
+
+        let witness_serialized: Vec<u8> = serialize(&witness_vec);
+        let witness_serialized_annex: Vec<u8> = serialize(&witness_vec_annex);
+
+        let witness = deserialize::<Witness>(&witness_serialized[..]).unwrap();
+        let witness_annex = deserialize::<Witness>(&witness_serialized_annex[..]).unwrap();
+
+        // With or without annex, the tapscript should be returned.
+        assert_eq!(witness.tapscript(), Some(Script::from_bytes(&tapscript[..])));
+        assert_eq!(witness_annex.tapscript(), Some(Script::from_bytes(&tapscript[..])));
     }
 }
