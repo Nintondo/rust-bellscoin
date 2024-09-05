@@ -1,19 +1,20 @@
 [package]
-name = "bitcoin"
+name = "bellscoin"
 version = "0.30.2"
-authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
+authors = ["Nintondo"]
 license = "CC0-1.0"
-repository = "https://github.com/rust-bitcoin/rust-bitcoin/"
-documentation = "https://docs.rs/bitcoin/"
-description = "General purpose library for using and interoperating with Bitcoin."
+homepage = "https://github.com/Nintondo/rust-bellscoin/"
+repository = "https://github.com/Nintondo/rust-bellscoin/"
+documentation = "https://docs.rs/bellscoin/"
+description = "General purpose library for using and interoperating with Bellscoin."
 categories = ["cryptography::cryptocurrencies"]
-keywords = [ "crypto", "bitcoin" ]
+keywords = ["crypto", "bitcoin"]
 readme = "../README.md"
 edition = "2018"
 exclude = ["tests", "contrib"]
 
 [features]
-default = [ "std", "secp-recovery" ]
+default = ["std", "secp-recovery"]
 rand-std = ["secp256k1/rand-std"]
 rand = ["secp256k1/rand"]
 serde = ["actual-serde", "bitcoin_hashes/serde", "secp256k1/serde"]
@@ -26,8 +27,18 @@ bitcoinconsensus-std = ["bitcoinconsensus/std", "std"]
 # The no-std feature doesn't disable std - you need to turn off the std feature for that by disabling default.
 # Instead no-std enables additional features required for this crate to be usable without std.
 # As a result, both can be enabled without conflict.
-std = ["secp256k1/std", "bitcoin_hashes/std", "bech32/std", "bitcoin-internals/std"]
-no-std = ["core2", "bitcoin_hashes/alloc", "bitcoin_hashes/core2", "secp256k1/alloc"]
+std = [
+    "secp256k1/std",
+    "bitcoin_hashes/std",
+    "bech32/std",
+    "bitcoin-internals/std",
+]
+no-std = [
+    "core2",
+    "bitcoin_hashes/alloc",
+    "bitcoin_hashes/core2",
+    "secp256k1/alloc",
+]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -37,15 +48,24 @@ rustdoc-args = ["--cfg", "docsrs"]
 bitcoin-internals = { path = "../internals", package = "bitcoin-private", version = "0.1.0" }
 bech32 = { version = "0.9.0", default-features = false }
 bitcoin_hashes = { version = "0.12.0", default-features = false }
-secp256k1 = { version = "0.27.0", default-features = false, features = ["bitcoin_hashes"] }
-hex = { package = "hex-conservative", version = "0.2.0", default-features = false, features = ["alloc"] }
+secp256k1 = { version = "0.27.0", default-features = false, features = [
+    "bitcoin_hashes",
+] }
+hex = { package = "hex-conservative", version = "0.2.0", default-features = false, features = [
+    "alloc",
+] }
 hex_lit = "0.1.1"
 
 base64 = { version = "0.13.0", optional = true }
 bitcoinconsensus = { version = "0.20.2-0.5.0", default-features = false, optional = true }
-core2 = { version = "0.3.0", default-features = false, features = ["alloc"], optional = true }
+core2 = { version = "0.3.0", default-features = false, features = [
+    "alloc",
+], optional = true }
 # Do NOT use this as a feature! Use the `serde` feature instead.
-actual-serde = { package = "serde", version = "1.0.103", default-features = false, features = [ "derive", "alloc" ], optional = true }
+actual-serde = { package = "serde", version = "1.0.103", default-features = false, features = [
+    "derive",
+    "alloc",
+], optional = true }
 
 [dev-dependencies]
 serde_json = "1.0.0"
