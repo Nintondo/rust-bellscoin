@@ -142,7 +142,9 @@ impl ChildNumber {
     /// Returns `true` if the child number is a [`Normal`] value.
     ///
     /// [`Normal`]: #variant.Normal
-    pub fn is_normal(&self) -> bool { !self.is_hardened() }
+    pub fn is_normal(&self) -> bool {
+        !self.is_hardened()
+    }
 
     /// Returns `true` if the child number is a [`Hardened`] value.
     ///
@@ -253,38 +255,54 @@ where
     type Output = <Vec<ChildNumber> as Index<I>>::Output;
 
     #[inline]
-    fn index(&self, index: I) -> &Self::Output { &self.0[index] }
+    fn index(&self, index: I) -> &Self::Output {
+        &self.0[index]
+    }
 }
 
 impl Default for DerivationPath {
-    fn default() -> DerivationPath { DerivationPath::master() }
+    fn default() -> DerivationPath {
+        DerivationPath::master()
+    }
 }
 
 impl<T> IntoDerivationPath for T
 where
     T: Into<DerivationPath>,
 {
-    fn into_derivation_path(self) -> Result<DerivationPath, Error> { Ok(self.into()) }
+    fn into_derivation_path(self) -> Result<DerivationPath, Error> {
+        Ok(self.into())
+    }
 }
 
 impl IntoDerivationPath for String {
-    fn into_derivation_path(self) -> Result<DerivationPath, Error> { self.parse() }
+    fn into_derivation_path(self) -> Result<DerivationPath, Error> {
+        self.parse()
+    }
 }
 
 impl<'a> IntoDerivationPath for &'a str {
-    fn into_derivation_path(self) -> Result<DerivationPath, Error> { self.parse() }
+    fn into_derivation_path(self) -> Result<DerivationPath, Error> {
+        self.parse()
+    }
 }
 
 impl From<Vec<ChildNumber>> for DerivationPath {
-    fn from(numbers: Vec<ChildNumber>) -> Self { DerivationPath(numbers) }
+    fn from(numbers: Vec<ChildNumber>) -> Self {
+        DerivationPath(numbers)
+    }
 }
 
 impl From<DerivationPath> for Vec<ChildNumber> {
-    fn from(path: DerivationPath) -> Self { path.0 }
+    fn from(path: DerivationPath) -> Self {
+        path.0
+    }
 }
 
 impl<'a> From<&'a [ChildNumber]> for DerivationPath {
-    fn from(numbers: &'a [ChildNumber]) -> Self { DerivationPath(numbers.to_vec()) }
+    fn from(numbers: &'a [ChildNumber]) -> Self {
+        DerivationPath(numbers.to_vec())
+    }
 }
 
 impl core::iter::FromIterator<ChildNumber> for DerivationPath {
@@ -299,11 +317,15 @@ impl core::iter::FromIterator<ChildNumber> for DerivationPath {
 impl<'a> core::iter::IntoIterator for &'a DerivationPath {
     type Item = &'a ChildNumber;
     type IntoIter = slice::Iter<'a, ChildNumber>;
-    fn into_iter(self) -> Self::IntoIter { self.0.iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
 }
 
 impl AsRef<[ChildNumber]> for DerivationPath {
-    fn as_ref(&self) -> &[ChildNumber] { &self.0 }
+    fn as_ref(&self) -> &[ChildNumber] {
+        &self.0
+    }
 }
 
 impl FromStr for DerivationPath {
@@ -349,17 +371,25 @@ impl<'a> Iterator for DerivationPathIterator<'a> {
 
 impl DerivationPath {
     /// Returns length of the derivation path
-    pub fn len(&self) -> usize { self.0.len() }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 
     /// Returns `true` if the derivation path is empty
-    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 
     /// Returns derivation path for a master key (i.e. empty derivation path)
-    pub fn master() -> DerivationPath { DerivationPath(vec![]) }
+    pub fn master() -> DerivationPath {
+        DerivationPath(vec![])
+    }
 
     /// Returns whether derivation path represents master key (i.e. it's length
     /// is empty). True for `m` path.
-    pub fn is_master(&self) -> bool { self.0.is_empty() }
+    pub fn is_master(&self) -> bool {
+        self.0.is_empty()
+    }
 
     /// Create a new [DerivationPath] that is a child of this one.
     pub fn child(&self, cn: ChildNumber) -> DerivationPath {
@@ -426,7 +456,9 @@ impl fmt::Display for DerivationPath {
 }
 
 impl fmt::Debug for DerivationPath {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
 }
 
 /// Full information on the used extended public key: fingerprint of the
@@ -462,21 +494,26 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Error::CannotDeriveFromHardenedKey =>
-                f.write_str("cannot derive hardened key from public key"),
+            Error::CannotDeriveFromHardenedKey => {
+                f.write_str("cannot derive hardened key from public key")
+            }
             Error::Secp256k1(ref e) => write_err!(f, "secp256k1 error"; e),
-            Error::InvalidChildNumber(ref n) =>
-                write!(f, "child number {} is invalid (not within [0, 2^31 - 1])", n),
+            Error::InvalidChildNumber(ref n) => {
+                write!(f, "child number {} is invalid (not within [0, 2^31 - 1])", n)
+            }
             Error::InvalidChildNumberFormat => f.write_str("invalid child number format"),
             Error::InvalidDerivationPathFormat => f.write_str("invalid derivation path format"),
-            Error::UnknownVersion(ref bytes) =>
-                write!(f, "unknown version magic bytes: {:?}", bytes),
-            Error::WrongExtendedKeyLength(ref len) =>
-                write!(f, "encoded extended key data has wrong length {}", len),
+            Error::UnknownVersion(ref bytes) => {
+                write!(f, "unknown version magic bytes: {:?}", bytes)
+            }
+            Error::WrongExtendedKeyLength(ref len) => {
+                write!(f, "encoded extended key data has wrong length {}", len)
+            }
             Error::Base58(ref e) => write_err!(f, "base58 encoding error"; e),
             Error::Hex(ref e) => write_err!(f, "Hexadecimal decoding error"; e),
-            Error::InvalidPublicKeyHexLength(got) =>
-                write!(f, "PublicKey hex should be 66 or 130 digits long, got: {}", got),
+            Error::InvalidPublicKeyHexLength(got) => {
+                write!(f, "PublicKey hex should be 66 or 130 digits long, got: {}", got)
+            }
         }
     }
 }
@@ -515,11 +552,15 @@ impl From<key::Error> for Error {
 }
 
 impl From<secp256k1::Error> for Error {
-    fn from(e: secp256k1::Error) -> Error { Error::Secp256k1(e) }
+    fn from(e: secp256k1::Error) -> Error {
+        Error::Secp256k1(e)
+    }
 }
 
 impl From<base58::Error> for Error {
-    fn from(err: base58::Error) -> Self { Error::Base58(err) }
+    fn from(err: base58::Error) -> Self {
+        Error::Base58(err)
+    }
 }
 
 impl ExtendedPrivKey {
@@ -610,9 +651,9 @@ impl ExtendedPrivKey {
             return Err(Error::WrongExtendedKeyLength(data.len()));
         }
 
-        let network = if data[0..4] == [0x04u8, 0x88, 0xAD, 0xE4] {
-            Network::Bitcoin
-        } else if data[0..4] == [0x04u8, 0x35, 0x83, 0x94] {
+        let network = if data[0..4] == [0x02u8, 0xFA, 0xC3, 0x98] {
+            Network::Bellscoin
+        } else if data[0..4] == [0x02u8, 0xFA, 0xC3, 0x98] {
             Network::Testnet
         } else {
             let mut ver = [0u8; 4];
@@ -639,8 +680,8 @@ impl ExtendedPrivKey {
         let mut ret = [0; 78];
         ret[0..4].copy_from_slice(
             &match self.network {
-                Network::Bitcoin => [0x04, 0x88, 0xAD, 0xE4],
-                Network::Testnet | Network::Signet | Network::Regtest => [0x04, 0x35, 0x83, 0x94],
+                Network::Bellscoin => [0x02, 0xFA, 0xC3, 0x98],
+                Network::Testnet | Network::Signet | Network::Regtest => [0x02, 0xFA, 0xC3, 0x98],
             }[..],
         );
         ret[4] = self.depth;
@@ -680,11 +721,15 @@ impl ExtendedPubKey {
     }
 
     /// Constructs ECDSA compressed public key matching internal public key representation.
-    pub fn to_pub(self) -> PublicKey { PublicKey { compressed: true, inner: self.public_key } }
+    pub fn to_pub(self) -> PublicKey {
+        PublicKey { compressed: true, inner: self.public_key }
+    }
 
     /// Constructs BIP340 x-only public key for BIP-340 signatures and Taproot use matching
     /// the internal public key representation.
-    pub fn to_x_only_pub(self) -> XOnlyPublicKey { XOnlyPublicKey::from(self.public_key) }
+    pub fn to_x_only_pub(self) -> XOnlyPublicKey {
+        XOnlyPublicKey::from(self.public_key)
+    }
 
     /// Attempts to derive an extended public key from a path.
     ///
@@ -749,9 +794,9 @@ impl ExtendedPubKey {
         }
 
         Ok(ExtendedPubKey {
-            network: if data[0..4] == [0x04u8, 0x88, 0xB2, 0x1E] {
-                Network::Bitcoin
-            } else if data[0..4] == [0x04u8, 0x35, 0x87, 0xCF] {
+            network: if data[0..4] == [0x02u8, 0xFA, 0xCA, 0xFD] {
+                Network::Bellscoin
+            } else if data[0..4] == [0x02u8, 0xFA, 0xCA, 0xFD] {
                 Network::Testnet
             } else {
                 let mut ver = [0u8; 4];
@@ -775,8 +820,8 @@ impl ExtendedPubKey {
         let mut ret = [0; 78];
         ret[0..4].copy_from_slice(
             &match self.network {
-                Network::Bitcoin => [0x04u8, 0x88, 0xB2, 0x1E],
-                Network::Testnet | Network::Signet | Network::Regtest => [0x04u8, 0x35, 0x87, 0xCF],
+                Network::Bellscoin => [0x02u8, 0xFA, 0xCA, 0xFD],
+                Network::Testnet | Network::Signet | Network::Regtest => [0x02u8, 0xFA, 0xCA, 0xFD],
             }[..],
         );
         ret[4] = self.depth;
@@ -841,11 +886,15 @@ impl FromStr for ExtendedPubKey {
 }
 
 impl From<ExtendedPubKey> for XpubIdentifier {
-    fn from(key: ExtendedPubKey) -> XpubIdentifier { key.identifier() }
+    fn from(key: ExtendedPubKey) -> XpubIdentifier {
+        key.identifier()
+    }
 }
 
 impl From<&ExtendedPubKey> for XpubIdentifier {
-    fn from(key: &ExtendedPubKey) -> XpubIdentifier { key.identifier() }
+    fn from(key: &ExtendedPubKey) -> XpubIdentifier {
+        key.identifier()
+    }
 }
 
 #[cfg(test)]
@@ -857,7 +906,7 @@ mod tests {
     use super::ChildNumber::{Hardened, Normal};
     use super::*;
     use crate::internal_macros::hex;
-    use crate::network::constants::Network::{self, Bitcoin};
+    use crate::network::constants::Network::{self, Bellscoin};
 
     #[test]
     fn test_parse_derivation_path() {
@@ -1033,32 +1082,32 @@ mod tests {
         let seed = hex!("000102030405060708090a0b0c0d0e0f");
 
         // m
-        test_path(&secp, Bitcoin, &seed, "m".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m".parse().unwrap(),
                   "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi",
                   "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
 
         // m/0h
-        test_path(&secp, Bitcoin, &seed, "m/0h".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h".parse().unwrap(),
                   "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7",
                   "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
 
         // m/0h/1
-        test_path(&secp, Bitcoin, &seed, "m/0h/1".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h/1".parse().unwrap(),
                    "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs",
                    "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
 
         // m/0h/1/2h
-        test_path(&secp, Bitcoin, &seed, "m/0h/1/2h".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h/1/2h".parse().unwrap(),
                   "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM",
                   "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
 
         // m/0h/1/2h/2
-        test_path(&secp, Bitcoin, &seed, "m/0h/1/2h/2".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h/1/2h/2".parse().unwrap(),
                   "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334",
                   "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
 
         // m/0h/1/2h/2/1000000000
-        test_path(&secp, Bitcoin, &seed, "m/0h/1/2h/2/1000000000".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h/1/2h/2/1000000000".parse().unwrap(),
                   "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76",
                   "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
     }
@@ -1069,32 +1118,32 @@ mod tests {
         let seed = hex!("fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542");
 
         // m
-        test_path(&secp, Bitcoin, &seed, "m".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m".parse().unwrap(),
                   "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U",
                   "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB");
 
         // m/0
-        test_path(&secp, Bitcoin, &seed, "m/0".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0".parse().unwrap(),
                   "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt",
                   "xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH");
 
         // m/0/2147483647h
-        test_path(&secp, Bitcoin, &seed, "m/0/2147483647h".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0/2147483647h".parse().unwrap(),
                   "xprv9wSp6B7kry3Vj9m1zSnLvN3xH8RdsPP1Mh7fAaR7aRLcQMKTR2vidYEeEg2mUCTAwCd6vnxVrcjfy2kRgVsFawNzmjuHc2YmYRmagcEPdU9",
                   "xpub6ASAVgeehLbnwdqV6UKMHVzgqAG8Gr6riv3Fxxpj8ksbH9ebxaEyBLZ85ySDhKiLDBrQSARLq1uNRts8RuJiHjaDMBU4Zn9h8LZNnBC5y4a");
 
         // m/0/2147483647h/1
-        test_path(&secp, Bitcoin, &seed, "m/0/2147483647h/1".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0/2147483647h/1".parse().unwrap(),
                   "xprv9zFnWC6h2cLgpmSA46vutJzBcfJ8yaJGg8cX1e5StJh45BBciYTRXSd25UEPVuesF9yog62tGAQtHjXajPPdbRCHuWS6T8XA2ECKADdw4Ef",
                   "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon");
 
         // m/0/2147483647h/1/2147483646h
-        test_path(&secp, Bitcoin, &seed, "m/0/2147483647h/1/2147483646h".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0/2147483647h/1/2147483646h".parse().unwrap(),
                   "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS3xz7iAxn8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc",
                   "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL");
 
         // m/0/2147483647h/1/2147483646h/2
-        test_path(&secp, Bitcoin, &seed, "m/0/2147483647h/1/2147483646h/2".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0/2147483647h/1/2147483646h/2".parse().unwrap(),
                   "xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKCEXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j",
                   "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
     }
@@ -1105,12 +1154,12 @@ mod tests {
         let seed = hex!("4b381541583be4423346c643850da4b320e46a87ae3d2a4e6da11eba819cd4acba45d239319ac14f863b8d5ab5a0d0c64d2e8a1e7d1457df2e5a3c51c73235be");
 
         // m
-        test_path(&secp, Bitcoin, &seed, "m".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m".parse().unwrap(),
                   "xprv9s21ZrQH143K25QhxbucbDDuQ4naNntJRi4KUfWT7xo4EKsHt2QJDu7KXp1A3u7Bi1j8ph3EGsZ9Xvz9dGuVrtHHs7pXeTzjuxBrCmmhgC6",
                   "xpub661MyMwAqRbcEZVB4dScxMAdx6d4nFc9nvyvH3v4gJL378CSRZiYmhRoP7mBy6gSPSCYk6SzXPTf3ND1cZAceL7SfJ1Z3GC8vBgp2epUt13");
 
         // m/0h
-        test_path(&secp, Bitcoin, &seed, "m/0h".parse().unwrap(),
+        test_path(&secp, Bellscoin, &seed, "m/0h".parse().unwrap(),
                   "xprv9uPDJpEQgRQfDcW7BkF7eTya6RPxXeJCqCJGHuCJ4GiRVLzkTXBAJMu2qaMWPrS7AANYqdq6vcBcBUdJCVVFceUvJFjaPdGZ2y9WACViL4L",
                   "xpub68NZiKmJWnxxS6aaHmn81bvJeTESw724CRDs6HbuccFQN9Ku14VQrADWgqbhhTHBaohPX4CjNLf9fq9MYo6oDaPPLPxSb7gwQN3ih19Zm4Y");
     }

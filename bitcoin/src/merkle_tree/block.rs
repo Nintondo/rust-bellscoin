@@ -123,7 +123,7 @@ impl MerkleBlock {
         let matches: Vec<bool> = block_txids.iter().map(match_txids).collect();
 
         let pmt = PartialMerkleTree::from_txids(block_txids, &matches);
-        MerkleBlock { header: *header, txn: pmt }
+        MerkleBlock { header: header.clone(), txn: pmt }
     }
 
     /// Extract the matching txid's represented by this partial merkle tree
@@ -205,13 +205,19 @@ pub struct PartialMerkleTree {
 
 impl PartialMerkleTree {
     /// Returns the total number of transactions in the block.
-    pub fn num_transactions(&self) -> u32 { self.num_transactions }
+    pub fn num_transactions(&self) -> u32 {
+        self.num_transactions
+    }
 
     /// Returns the node-is-parent-of-matched-txid bits of the partial merkle tree.
-    pub fn bits(&self) -> &Vec<bool> { &self.bits }
+    pub fn bits(&self) -> &Vec<bool> {
+        &self.bits
+    }
 
     /// Returns the transaction ids and internal hashes of the partial merkle tree.
-    pub fn hashes(&self) -> &Vec<TxMerkleNode> { &self.hashes }
+    pub fn hashes(&self) -> &Vec<TxMerkleNode> {
+        &self.hashes
+    }
 
     /// Construct a partial merkle tree
     /// The `txids` are the transaction hashes of the block and the `matches` is the contains flags
@@ -560,7 +566,9 @@ mod tests {
 
     /// Parses the transaction count out of `name` with form: `pmt_test_$num`.
     #[cfg(feature = "rand-std")]
-    fn pmt_test_from_name(name: &str) { pmt_test(name[9..].parse().unwrap()) }
+    fn pmt_test_from_name(name: &str) {
+        pmt_test(name[9..].parse().unwrap())
+    }
 
     #[cfg(feature = "rand-std")]
     fn pmt_test(tx_count: usize) {

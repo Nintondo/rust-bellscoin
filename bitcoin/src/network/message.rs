@@ -93,11 +93,15 @@ impl core::str::FromStr for CommandString {
 }
 
 impl fmt::Display for CommandString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.0.as_ref())
+    }
 }
 
 impl AsRef<str> for CommandString {
-    fn as_ref(&self) -> &str { self.0.as_ref() }
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
 }
 
 impl Encodable for CommandString {
@@ -308,10 +312,14 @@ impl RawNetworkMessage {
     /// This returns `"unknown"` for [NetworkMessage::Unknown],
     /// regardless of the actual command in the unknown message.
     /// Use the [Self::command] method to get the command for unknown messages.
-    pub fn cmd(&self) -> &'static str { self.payload.cmd() }
+    pub fn cmd(&self) -> &'static str {
+        self.payload.cmd()
+    }
 
     /// Return the CommandString for the message command.
-    pub fn command(&self) -> CommandString { self.payload.command() }
+    pub fn command(&self) -> CommandString {
+        self.payload.command()
+    }
 }
 
 struct HeaderSerializationWrapper<'a>(&'a Vec<block::Header>);
@@ -416,15 +424,19 @@ impl Decodable for RawNetworkMessage {
 
         let mut mem_d = io::Cursor::new(raw_payload);
         let payload = match &cmd.0[..] {
-            "version" =>
-                NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "version" => {
+                NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "verack" => NetworkMessage::Verack,
-            "addr" =>
-                NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "inv" =>
-                NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "getdata" =>
-                NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "addr" => {
+                NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "inv" => {
+                NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "getdata" => {
+                NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "notfound" => NetworkMessage::NotFound(Decodable::consensus_decode_from_finite_reader(
                 &mut mem_d,
             )?),
@@ -435,17 +447,20 @@ impl Decodable for RawNetworkMessage {
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
             "mempool" => NetworkMessage::MemPool,
-            "block" =>
-                NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "block" => {
+                NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "headers" => NetworkMessage::Headers(
                 HeaderDeserializationWrapper::consensus_decode_from_finite_reader(&mut mem_d)?.0,
             ),
             "sendheaders" => NetworkMessage::SendHeaders,
             "getaddr" => NetworkMessage::GetAddr,
-            "ping" =>
-                NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "pong" =>
-                NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "ping" => {
+                NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "pong" => {
+                NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "merkleblock" => NetworkMessage::MerkleBlock(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -460,8 +475,9 @@ impl Decodable for RawNetworkMessage {
             "getcfilters" => NetworkMessage::GetCFilters(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
-            "cfilter" =>
-                NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "cfilter" => {
+                NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "getcfheaders" => NetworkMessage::GetCFHeaders(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -474,10 +490,12 @@ impl Decodable for RawNetworkMessage {
             "cfcheckpt" => NetworkMessage::CFCheckpt(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
-            "reject" =>
-                NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "alert" =>
-                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "reject" => {
+                NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "alert" => {
+                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "feefilter" => NetworkMessage::FeeFilter(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -494,8 +512,9 @@ impl Decodable for RawNetworkMessage {
                 &mut mem_d,
             )?),
             "wtxidrelay" => NetworkMessage::WtxidRelay,
-            "addrv2" =>
-                NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "addrv2" => {
+                NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "sendaddrv2" => NetworkMessage::SendAddrV2,
             _ => NetworkMessage::Unknown { command: cmd, payload: mem_d.into_inner() },
         };
@@ -531,7 +550,9 @@ mod test {
         CFCheckpt, CFHeaders, CFilter, GetCFCheckpt, GetCFHeaders, GetCFilters,
     };
 
-    fn hash(slice: [u8; 32]) -> Hash { Hash::from_slice(&slice).unwrap() }
+    fn hash(slice: [u8; 32]) -> Hash {
+        Hash::from_slice(&slice).unwrap()
+    }
 
     #[test]
     fn full_round_ser_der_raw_network_message_test() {
@@ -676,7 +697,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_verack_test() {
-        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bitcoin), payload: NetworkMessage::Verack }),
+        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bellscoin), payload: NetworkMessage::Verack }),
                    vec![0xf9, 0xbe, 0xb4, 0xd9, 0x76, 0x65, 0x72, 0x61,
                         0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -685,7 +706,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_ping_test() {
-        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bitcoin), payload: NetworkMessage::Ping(100) }),
+        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bellscoin), payload: NetworkMessage::Ping(100) }),
                    vec![0xf9, 0xbe, 0xb4, 0xd9, 0x70, 0x69, 0x6e, 0x67,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x08, 0x00, 0x00, 0x00, 0x24, 0x67, 0xf1, 0x1d,
@@ -695,7 +716,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_mempool_test() {
-        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bitcoin), payload: NetworkMessage::MemPool }),
+        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bellscoin), payload: NetworkMessage::MemPool }),
                    vec![0xf9, 0xbe, 0xb4, 0xd9, 0x6d, 0x65, 0x6d, 0x70,
                         0x6f, 0x6f, 0x6c, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -704,7 +725,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_getaddr_test() {
-        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bitcoin), payload: NetworkMessage::GetAddr }),
+        assert_eq!(serialize(&RawNetworkMessage { magic: Magic::from(Network::Bellscoin), payload: NetworkMessage::GetAddr }),
                    vec![0xf9, 0xbe, 0xb4, 0xd9, 0x67, 0x65, 0x74, 0x61,
                         0x64, 0x64, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -719,7 +740,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2
         ]);
         let preimage = RawNetworkMessage {
-            magic: Magic::from(Network::Bitcoin),
+            magic: Magic::from(Network::Bellscoin),
             payload: NetworkMessage::GetAddr,
         };
         assert!(msg.is_ok());
@@ -752,7 +773,7 @@ mod test {
 
         assert!(msg.is_ok());
         let msg = msg.unwrap();
-        assert_eq!(msg.magic, Magic::from(Network::Bitcoin));
+        assert_eq!(msg.magic, Magic::from(Network::Bellscoin));
         if let NetworkMessage::Version(version_msg) = msg.payload {
             assert_eq!(version_msg.version, 70015);
             assert_eq!(
@@ -798,7 +819,7 @@ mod test {
 
         let (msg, consumed) = msg.unwrap();
         assert_eq!(consumed, data.to_vec().len() - 2);
-        assert_eq!(msg.magic, Magic::from(Network::Bitcoin));
+        assert_eq!(msg.magic, Magic::from(Network::Bellscoin));
         if let NetworkMessage::Version(version_msg) = msg.payload {
             assert_eq!(version_msg.version, 70015);
             assert_eq!(

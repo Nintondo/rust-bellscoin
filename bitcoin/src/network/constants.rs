@@ -68,7 +68,7 @@ pub const PROTOCOL_VERSION: u32 = 70001;
 #[non_exhaustive]
 pub enum Network {
     /// Mainnet Bitcoin.
-    Bitcoin,
+    Bellscoin,
     /// Bitcoin's testnet network.
     Testnet,
     /// Bitcoin's signet network.
@@ -89,7 +89,9 @@ impl Network {
     /// assert_eq!(Ok(Network::Bitcoin), Network::try_from(Magic::from_bytes([0xF9, 0xBE, 0xB4, 0xD9])));
     /// assert_eq!(None, Network::from_magic(Magic::from_bytes([0xFF, 0xFF, 0xFF, 0xFF])));
     /// ```
-    pub fn from_magic(magic: Magic) -> Option<Network> { Network::try_from(magic).ok() }
+    pub fn from_magic(magic: Magic) -> Option<Network> {
+        Network::try_from(magic).ok()
+    }
 
     /// Return the network magic bytes, which should be encoded little-endian
     /// at the start of every message
@@ -102,7 +104,9 @@ impl Network {
     /// let network = Network::Bitcoin;
     /// assert_eq!(network.magic(), Magic::from_bytes([0xF9, 0xBE, 0xB4, 0xD9]));
     /// ```
-    pub fn magic(self) -> Magic { Magic::from(self) }
+    pub fn magic(self) -> Magic {
+        Magic::from(self)
+    }
 
     /// Converts a `Network` to its equivalent `bitcoind -chain` argument name.
     ///
@@ -115,7 +119,7 @@ impl Network {
     /// ```
     pub fn to_core_arg(self) -> &'static str {
         match self {
-            Network::Bitcoin => "main",
+            Network::Bellscoin => "main",
             Network::Testnet => "test",
             Network::Signet => "signet",
             Network::Regtest => "regtest",
@@ -135,7 +139,7 @@ impl Network {
         use Network::*;
 
         let network = match core_arg {
-            "main" => Bitcoin,
+            "main" => Bellscoin,
             "test" => Testnet,
             "signet" => Signet,
             "regtest" => Regtest,
@@ -155,7 +159,9 @@ impl Network {
     /// let network = Network::Bitcoin;
     /// assert_eq!(network.chain_hash(), ChainHash::BITCOIN);
     /// ```
-    pub fn chain_hash(self) -> ChainHash { ChainHash::using_genesis_block(self) }
+    pub fn chain_hash(self) -> ChainHash {
+        ChainHash::using_genesis_block(self)
+    }
 
     /// Creates a `Network` from the chain hash (genesis block hash).
     ///
@@ -192,7 +198,7 @@ impl FromStr for Network {
         use Network::*;
 
         let network = match s {
-            "bitcoin" => Bitcoin,
+            "mainnet" => Bellscoin,
             "testnet" => Testnet,
             "signet" => Signet,
             "regtest" => Regtest,
@@ -207,7 +213,7 @@ impl fmt::Display for Network {
         use Network::*;
 
         let s = match *self {
-            Bitcoin => "bitcoin",
+            Bellscoin => "mainner",
             Testnet => "testnet",
             Signet => "signet",
             Regtest => "regtest",
@@ -234,7 +240,7 @@ impl TryFrom<ChainHash> for Network {
     fn try_from(chain_hash: ChainHash) -> Result<Self, Self::Error> {
         match chain_hash {
             // Note: any new network entries must be matched against here.
-            ChainHash::BITCOIN => Ok(Network::Bitcoin),
+            ChainHash::BITCOIN => Ok(Network::Bellscoin),
             ChainHash::TESTNET => Ok(Network::Testnet),
             ChainHash::SIGNET => Ok(Network::Signet),
             ChainHash::REGTEST => Ok(Network::Regtest),
@@ -248,20 +254,24 @@ impl TryFrom<ChainHash> for Network {
 pub struct Magic([u8; 4]);
 
 impl Magic {
-    /// Bitcoin mainnet network magic bytes.
-    pub const BITCOIN: Self = Self([0xF9, 0xBE, 0xB4, 0xD9]);
-    /// Bitcoin testnet network magic bytes.
-    pub const TESTNET: Self = Self([0x0B, 0x11, 0x09, 0x07]);
+    /// bellscoin mainnet network magic bytes.
+    pub const BELLSCOIN: Self = Self([0xC0, 0xC0, 0xC0, 0xC0]);
+    /// Bellscoin testnet network magic bytes.
+    pub const TESTNET: Self = Self([0xC3, 0xC3, 0xC3, 0xC3]);
     /// Bitcoin signet network magic bytes.
     pub const SIGNET: Self = Self([0x0A, 0x03, 0xCF, 0x40]);
     /// Bitcoin regtest network magic bytes.
     pub const REGTEST: Self = Self([0xFA, 0xBF, 0xB5, 0xDA]);
 
     /// Create network magic from bytes.
-    pub fn from_bytes(bytes: [u8; 4]) -> Magic { Magic(bytes) }
+    pub fn from_bytes(bytes: [u8; 4]) -> Magic {
+        Magic(bytes)
+    }
 
     /// Get network magic bytes.
-    pub fn to_bytes(self) -> [u8; 4] { self.0 }
+    pub fn to_bytes(self) -> [u8; 4] {
+        self.0
+    }
 }
 
 /// An error in parsing magic bytes.
@@ -288,7 +298,7 @@ impl From<Network> for Magic {
     fn from(network: Network) -> Magic {
         match network {
             // Note: new network entries must explicitly be matched in `try_from` below.
-            Network::Bitcoin => Magic::BITCOIN,
+            Network::Bellscoin => Magic::BELLSCOIN,
             Network::Testnet => Magic::TESTNET,
             Network::Signet => Magic::SIGNET,
             Network::Regtest => Magic::REGTEST,
@@ -306,7 +316,7 @@ impl TryFrom<Magic> for Network {
     fn try_from(magic: Magic) -> Result<Self, Self::Error> {
         match magic {
             // Note: any new network entries must be matched against here.
-            Magic::BITCOIN => Ok(Network::Bitcoin),
+            Magic::BELLSCOIN => Ok(Network::Bellscoin),
             Magic::TESTNET => Ok(Network::Testnet),
             Magic::SIGNET => Ok(Network::Signet),
             Magic::REGTEST => Ok(Network::Regtest),
@@ -350,35 +360,51 @@ impl Decodable for Magic {
 }
 
 impl AsRef<[u8]> for Magic {
-    fn as_ref(&self) -> &[u8] { &self.0 }
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
 }
 
 impl AsRef<[u8; 4]> for Magic {
-    fn as_ref(&self) -> &[u8; 4] { &self.0 }
+    fn as_ref(&self) -> &[u8; 4] {
+        &self.0
+    }
 }
 
 impl AsMut<[u8]> for Magic {
-    fn as_mut(&mut self) -> &mut [u8] { &mut self.0 }
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
 }
 
 impl AsMut<[u8; 4]> for Magic {
-    fn as_mut(&mut self) -> &mut [u8; 4] { &mut self.0 }
+    fn as_mut(&mut self) -> &mut [u8; 4] {
+        &mut self.0
+    }
 }
 
 impl Borrow<[u8]> for Magic {
-    fn borrow(&self) -> &[u8] { &self.0 }
+    fn borrow(&self) -> &[u8] {
+        &self.0
+    }
 }
 
 impl Borrow<[u8; 4]> for Magic {
-    fn borrow(&self) -> &[u8; 4] { &self.0 }
+    fn borrow(&self) -> &[u8; 4] {
+        &self.0
+    }
 }
 
 impl BorrowMut<[u8]> for Magic {
-    fn borrow_mut(&mut self) -> &mut [u8] { &mut self.0 }
+    fn borrow_mut(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
 }
 
 impl BorrowMut<[u8; 4]> for Magic {
-    fn borrow_mut(&mut self) -> &mut [u8; 4] { &mut self.0 }
+    fn borrow_mut(&mut self) -> &mut [u8; 4] {
+        &mut self.0
+    }
 }
 
 impl fmt::Display for ParseMagicError {
@@ -450,18 +476,26 @@ impl ServiceFlags {
     }
 
     /// Check whether [ServiceFlags] are included in this one.
-    pub fn has(self, flags: ServiceFlags) -> bool { (self.0 | flags.0) == self.0 }
+    pub fn has(self, flags: ServiceFlags) -> bool {
+        (self.0 | flags.0) == self.0
+    }
 
     /// Gets the integer representation of this [`ServiceFlags`].
-    pub fn to_u64(self) -> u64 { self.0 }
+    pub fn to_u64(self) -> u64 {
+        self.0
+    }
 }
 
 impl fmt::LowerHex for ServiceFlags {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::LowerHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::LowerHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::UpperHex for ServiceFlags {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::UpperHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::UpperHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::Display for ServiceFlags {
@@ -502,31 +536,43 @@ impl fmt::Display for ServiceFlags {
 }
 
 impl From<u64> for ServiceFlags {
-    fn from(f: u64) -> Self { ServiceFlags(f) }
+    fn from(f: u64) -> Self {
+        ServiceFlags(f)
+    }
 }
 
 impl From<ServiceFlags> for u64 {
-    fn from(flags: ServiceFlags) -> Self { flags.0 }
+    fn from(flags: ServiceFlags) -> Self {
+        flags.0
+    }
 }
 
 impl ops::BitOr for ServiceFlags {
     type Output = Self;
 
-    fn bitor(mut self, rhs: Self) -> Self { self.add(rhs) }
+    fn bitor(mut self, rhs: Self) -> Self {
+        self.add(rhs)
+    }
 }
 
 impl ops::BitOrAssign for ServiceFlags {
-    fn bitor_assign(&mut self, rhs: Self) { self.add(rhs); }
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.add(rhs);
+    }
 }
 
 impl ops::BitXor for ServiceFlags {
     type Output = Self;
 
-    fn bitxor(mut self, rhs: Self) -> Self { self.remove(rhs) }
+    fn bitxor(mut self, rhs: Self) -> Self {
+        self.remove(rhs)
+    }
 }
 
 impl ops::BitXorAssign for ServiceFlags {
-    fn bitxor_assign(&mut self, rhs: Self) { self.remove(rhs); }
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.remove(rhs);
+    }
 }
 
 impl Encodable for ServiceFlags {
@@ -553,12 +599,12 @@ mod tests {
 
     #[test]
     fn serialize_test() {
-        assert_eq!(serialize(&Network::Bitcoin.magic()), &[0xf9, 0xbe, 0xb4, 0xd9]);
+        assert_eq!(serialize(&Network::Bellscoin.magic()), &[0xf9, 0xbe, 0xb4, 0xd9]);
         assert_eq!(serialize(&Network::Testnet.magic()), &[0x0b, 0x11, 0x09, 0x07]);
         assert_eq!(serialize(&Network::Signet.magic()), &[0x0a, 0x03, 0xcf, 0x40]);
         assert_eq!(serialize(&Network::Regtest.magic()), &[0xfa, 0xbf, 0xb5, 0xda]);
 
-        assert_eq!(deserialize(&[0xf9, 0xbe, 0xb4, 0xd9]).ok(), Some(Network::Bitcoin.magic()));
+        assert_eq!(deserialize(&[0xf9, 0xbe, 0xb4, 0xd9]).ok(), Some(Network::Bellscoin.magic()));
         assert_eq!(deserialize(&[0x0b, 0x11, 0x09, 0x07]).ok(), Some(Network::Testnet.magic()));
         assert_eq!(deserialize(&[0x0a, 0x03, 0xcf, 0x40]).ok(), Some(Network::Signet.magic()));
         assert_eq!(deserialize(&[0xfa, 0xbf, 0xb5, 0xda]).ok(), Some(Network::Regtest.magic()));
@@ -566,12 +612,12 @@ mod tests {
 
     #[test]
     fn string_test() {
-        assert_eq!(Network::Bitcoin.to_string(), "bitcoin");
+        assert_eq!(Network::Bellscoin.to_string(), "bitcoin");
         assert_eq!(Network::Testnet.to_string(), "testnet");
         assert_eq!(Network::Regtest.to_string(), "regtest");
         assert_eq!(Network::Signet.to_string(), "signet");
 
-        assert_eq!("bitcoin".parse::<Network>().unwrap(), Network::Bitcoin);
+        assert_eq!("bitcoin".parse::<Network>().unwrap(), Network::Bellscoin);
         assert_eq!("testnet".parse::<Network>().unwrap(), Network::Testnet);
         assert_eq!("regtest".parse::<Network>().unwrap(), Network::Regtest);
         assert_eq!("signet".parse::<Network>().unwrap(), Network::Signet);
@@ -644,7 +690,7 @@ mod tests {
     #[test]
     fn magic_from_str() {
         let known_network_magic_strs = [
-            ("f9beb4d9", Network::Bitcoin),
+            ("f9beb4d9", Network::Bellscoin),
             ("0b110907", Network::Testnet),
             ("fabfb5da", Network::Regtest),
             ("0a03cf40", Network::Signet),
@@ -660,7 +706,7 @@ mod tests {
     #[test]
     fn from_to_core_arg() {
         let expected_pairs = [
-            (Network::Bitcoin, "main"),
+            (Network::Bellscoin, "main"),
             (Network::Testnet, "test"),
             (Network::Regtest, "regtest"),
             (Network::Signet, "signet"),
