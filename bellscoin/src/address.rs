@@ -1145,8 +1145,8 @@ impl FromStr for Address<NetworkUnchecked> {
     fn from_str(s: &str) -> Result<Address<NetworkUnchecked>, Error> {
         // try bech32
         let bech32_network = match find_bech32_prefix(s) {
-            "bel" | "BEL" => Some(Network::Bellscoin),
-            "tbel" | "TBEL" => Some(Network::Testnet), // this may also be signet
+            "bel" => Some(Network::Bellscoin),
+            "tbel" => Some(Network::Testnet), // this may also be signet
             "bcrt" | "BCRT" => Some(Network::Regtest),
             _ => None,
         };
