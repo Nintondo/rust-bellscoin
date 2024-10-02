@@ -458,9 +458,7 @@ impl WitnessProgram {
 impl Payload {
     /// Constructs a [Payload] from an output script (`scriptPubkey`).
     pub fn from_script(script: &Script) -> Result<Payload, Error> {
-        Ok(if script.is_p2pk() {
-            Payload::PubkeyHash(PubkeyHash::hash(&script.as_bytes()[1..script.len()-1]))
-        } else if script.is_p2pkh() {
+        Ok(if script.is_p2pkh() {
             let bytes = script.as_bytes()[3..23].try_into().expect("statically 20B long");
             Payload::PubkeyHash(PubkeyHash::from_byte_array(bytes))
         } else if script.is_p2sh() {
