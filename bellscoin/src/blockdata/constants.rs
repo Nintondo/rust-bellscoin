@@ -76,7 +76,7 @@ fn bitcoin_genesis_tx() -> Transaction {
     let in_script = script::Builder::new()
         .push_int(486604799)
         .push_int_non_minimal(4)
-        .push_slice(b"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks")
+        .push_slice(b"Nintondo")
         .into_script();
     ret.input.push(TxIn {
         previous_output: OutPoint::null(),
@@ -86,10 +86,10 @@ fn bitcoin_genesis_tx() -> Transaction {
     });
 
     // Outputs
-    let script_bytes = hex!("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f");
+    let script_bytes = hex!("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9");
     let out_script =
         script::Builder::new().push_slice(script_bytes).push_opcode(OP_CHECKSIG).into_script();
-    ret.output.push(TxOut { value: 50 * COIN_VALUE, script_pubkey: out_script });
+    ret.output.push(TxOut { value: 88 * COIN_VALUE, script_pubkey: out_script });
 
     // end
     ret
@@ -106,9 +106,9 @@ pub fn genesis_block(network: Network) -> Block {
                 version: block::Version::ONE,
                 prev_blockhash: Hash::all_zeros(),
                 merkle_root,
-                time: 1231006505,
-                bits: CompactTarget::from_consensus(0x1d00ffff),
-                nonce: 2083236893,
+                time: 1383509530,
+                bits: CompactTarget::from_consensus(0x1e00ffff),
+                nonce: 44481,
                 auxpow: None,
             },
             txdata,
