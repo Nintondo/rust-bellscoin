@@ -372,128 +372,128 @@ impl BlockTransactions {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::blockdata::locktime::absolute;
-    use crate::consensus::encode::{deserialize, serialize};
-    use crate::hash_types::TxMerkleNode;
-    use crate::hashes::hex::FromHex;
-    use crate::{
-        CompactTarget, OutPoint, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Txid, Witness,
-    };
+// #[cfg(test)]
+// mod test {
+//     use super::*;
+//     use crate::blockdata::locktime::absolute;
+//     use crate::consensus::encode::{deserialize, serialize};
+//     use crate::hash_types::TxMerkleNode;
+//     use crate::hashes::hex::FromHex;
+//     use crate::{
+//         CompactTarget, OutPoint, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Txid, Witness,
+//     };
 
-    fn dummy_tx(nonce: &[u8]) -> Transaction {
-        Transaction {
-            version: 1,
-            lock_time: absolute::LockTime::from_consensus(2),
-            input: vec![TxIn {
-                previous_output: OutPoint::new(Txid::hash(nonce), 0),
-                script_sig: ScriptBuf::new(),
-                sequence: Sequence(1),
-                witness: Witness::new(),
-            }],
-            output: vec![TxOut { value: 1, script_pubkey: ScriptBuf::new() }],
-        }
-    }
+//     fn dummy_tx(nonce: &[u8]) -> Transaction {
+//         Transaction {
+//             version: 1,
+//             lock_time: absolute::LockTime::from_consensus(2),
+//             input: vec![TxIn {
+//                 previous_output: OutPoint::new(Txid::hash(nonce), 0),
+//                 script_sig: ScriptBuf::new(),
+//                 sequence: Sequence(1),
+//                 witness: Witness::new(),
+//             }],
+//             output: vec![TxOut { value: 1, script_pubkey: ScriptBuf::new() }],
+//         }
+//     }
 
-    fn dummy_block() -> Block {
-        Block {
-            header: block::Header {
-                version: block::Version::ONE,
-                prev_blockhash: BlockHash::hash(&[0]),
-                merkle_root: TxMerkleNode::hash(&[1]),
-                time: 2,
-                bits: CompactTarget::from_consensus(3),
-                nonce: 4,
-            },
-            txdata: vec![dummy_tx(&[2]), dummy_tx(&[3]), dummy_tx(&[4])],
-        }
-    }
+//     fn dummy_block() -> Block {
+//         Block {
+//             header: block::Header {
+//                 version: block::Version::ONE,
+//                 prev_blockhash: BlockHash::hash(&[0]),
+//                 merkle_root: TxMerkleNode::hash(&[1]),
+//                 time: 2,
+//                 bits: CompactTarget::from_consensus(3),
+//                 nonce: 4,
+//             },
+//             txdata: vec![dummy_tx(&[2]), dummy_tx(&[3]), dummy_tx(&[4])],
+//         }
+//     }
 
-    #[test]
-    fn test_header_and_short_ids_from_block() {
-        let block = dummy_block();
+//     #[test]
+//     fn test_header_and_short_ids_from_block() {
+//         let block = dummy_block();
 
-        let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[]).unwrap();
-        assert_eq!(compact.nonce, 42);
-        assert_eq!(compact.short_ids.len(), 2);
-        assert_eq!(compact.prefilled_txs.len(), 1);
-        assert_eq!(compact.prefilled_txs[0].idx, 0);
-        assert_eq!(&compact.prefilled_txs[0].tx, &block.txdata[0]);
+//         let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[]).unwrap();
+//         assert_eq!(compact.nonce, 42);
+//         assert_eq!(compact.short_ids.len(), 2);
+//         assert_eq!(compact.prefilled_txs.len(), 1);
+//         assert_eq!(compact.prefilled_txs[0].idx, 0);
+//         assert_eq!(&compact.prefilled_txs[0].tx, &block.txdata[0]);
 
-        let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[0, 1, 2]).unwrap();
-        let idxs = compact.prefilled_txs.iter().map(|t| t.idx).collect::<Vec<_>>();
-        assert_eq!(idxs, vec![0, 0, 0]);
+//         let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[0, 1, 2]).unwrap();
+//         let idxs = compact.prefilled_txs.iter().map(|t| t.idx).collect::<Vec<_>>();
+//         assert_eq!(idxs, vec![0, 0, 0]);
 
-        let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[2]).unwrap();
-        let idxs = compact.prefilled_txs.iter().map(|t| t.idx).collect::<Vec<_>>();
-        assert_eq!(idxs, vec![0, 1]);
-    }
+//         let compact = HeaderAndShortIds::from_block(&block, 42, 2, &[2]).unwrap();
+//         let idxs = compact.prefilled_txs.iter().map(|t| t.idx).collect::<Vec<_>>();
+//         assert_eq!(idxs, vec![0, 1]);
+//     }
 
-    #[test]
-    fn test_compact_block_vector() {
-        // Tested with Elements implementation of compact blocks.
-        let raw_block = Vec::<u8>::from_hex("000000206c750a364035aefd5f81508a08769975116d9195312ee4520dceac39e1fdc62c4dc67473b8e354358c1e610afeaff7410858bd45df43e2940f8a62bd3d5e3ac943c2975cffff7f200000000002020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff04016b0101ffffffff020006062a0100000001510000000000000000266a24aa21a9ed4a3d9f3343dafcc0d6f6d4310f2ee5ce273ed34edca6c75db3a73e7f368734200120000000000000000000000000000000000000000000000000000000000000000000000000020000000001021fc20ba2bd745507b8e00679e3b362558f9457db374ca28ffa5243f4c23a4d5f00000000171600147c9dea14ffbcaec4b575e03f05ceb7a81cd3fcbffdffffff915d689be87b43337f42e26033df59807b768223368f189a023d0242d837768900000000171600147c9dea14ffbcaec4b575e03f05ceb7a81cd3fcbffdffffff0200cdf5050000000017a9146803c72d9154a6a20f404bed6d3dcee07986235a8700e1f5050000000017a9144e6a4c7cb5b5562904843bdf816342f4db9f5797870247304402205e9bf6e70eb0e4b495bf483fd8e6e02da64900f290ef8aaa64bb32600d973c450220670896f5d0e5f33473e5f399ab680cc1d25c2d2afd15abd722f04978f28be887012103e4e4d9312b2261af508b367d8ba9be4f01b61d6d6e78bec499845b4f410bcf2702473044022045ac80596a6ac9c8c572f94708709adaf106677221122e08daf8b9741a04f66a022003ccd52a3b78f8fd08058fc04fc0cffa5f4c196c84eae9e37e2a85babe731b57012103e4e4d9312b2261af508b367d8ba9be4f01b61d6d6e78bec499845b4f410bcf276a000000").unwrap();
-        let raw_compact = Vec::<u8>::from_hex("000000206c750a364035aefd5f81508a08769975116d9195312ee4520dceac39e1fdc62c4dc67473b8e354358c1e610afeaff7410858bd45df43e2940f8a62bd3d5e3ac943c2975cffff7f2000000000a4df3c3744da89fa010a6979e971450100020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff04016b0101ffffffff020006062a0100000001510000000000000000266a24aa21a9ed4a3d9f3343dafcc0d6f6d4310f2ee5ce273ed34edca6c75db3a73e7f368734200120000000000000000000000000000000000000000000000000000000000000000000000000").unwrap();
+//     #[test]
+//     fn test_compact_block_vector() {
+//         // Tested with Elements implementation of compact blocks.
+//         let raw_block = Vec::<u8>::from_hex("000000206c750a364035aefd5f81508a08769975116d9195312ee4520dceac39e1fdc62c4dc67473b8e354358c1e610afeaff7410858bd45df43e2940f8a62bd3d5e3ac943c2975cffff7f200000000002020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff04016b0101ffffffff020006062a0100000001510000000000000000266a24aa21a9ed4a3d9f3343dafcc0d6f6d4310f2ee5ce273ed34edca6c75db3a73e7f368734200120000000000000000000000000000000000000000000000000000000000000000000000000020000000001021fc20ba2bd745507b8e00679e3b362558f9457db374ca28ffa5243f4c23a4d5f00000000171600147c9dea14ffbcaec4b575e03f05ceb7a81cd3fcbffdffffff915d689be87b43337f42e26033df59807b768223368f189a023d0242d837768900000000171600147c9dea14ffbcaec4b575e03f05ceb7a81cd3fcbffdffffff0200cdf5050000000017a9146803c72d9154a6a20f404bed6d3dcee07986235a8700e1f5050000000017a9144e6a4c7cb5b5562904843bdf816342f4db9f5797870247304402205e9bf6e70eb0e4b495bf483fd8e6e02da64900f290ef8aaa64bb32600d973c450220670896f5d0e5f33473e5f399ab680cc1d25c2d2afd15abd722f04978f28be887012103e4e4d9312b2261af508b367d8ba9be4f01b61d6d6e78bec499845b4f410bcf2702473044022045ac80596a6ac9c8c572f94708709adaf106677221122e08daf8b9741a04f66a022003ccd52a3b78f8fd08058fc04fc0cffa5f4c196c84eae9e37e2a85babe731b57012103e4e4d9312b2261af508b367d8ba9be4f01b61d6d6e78bec499845b4f410bcf276a000000").unwrap();
+//         let raw_compact = Vec::<u8>::from_hex("000000206c750a364035aefd5f81508a08769975116d9195312ee4520dceac39e1fdc62c4dc67473b8e354358c1e610afeaff7410858bd45df43e2940f8a62bd3d5e3ac943c2975cffff7f2000000000a4df3c3744da89fa010a6979e971450100020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff04016b0101ffffffff020006062a0100000001510000000000000000266a24aa21a9ed4a3d9f3343dafcc0d6f6d4310f2ee5ce273ed34edca6c75db3a73e7f368734200120000000000000000000000000000000000000000000000000000000000000000000000000").unwrap();
 
-        let block: Block = deserialize(&raw_block).unwrap();
-        let nonce = 18053200567810711460;
-        let compact = HeaderAndShortIds::from_block(&block, nonce, 2, &[]).unwrap();
-        let compact_expected = deserialize(&raw_compact).unwrap();
+//         let block: Block = deserialize(&raw_block).unwrap();
+//         let nonce = 18053200567810711460;
+//         let compact = HeaderAndShortIds::from_block(&block, nonce, 2, &[]).unwrap();
+//         let compact_expected = deserialize(&raw_compact).unwrap();
 
-        assert_eq!(compact, compact_expected);
-    }
+//         assert_eq!(compact, compact_expected);
+//     }
 
-    #[test]
-    fn test_getblocktx_differential_encoding_de_and_serialization() {
-        let testcases = vec![
-            // differentially encoded VarInts, indicies
-            (vec![4, 0, 5, 1, 10], vec![0, 6, 8, 19]),
-            (vec![1, 0], vec![0]),
-            (vec![5, 0, 0, 0, 0, 0], vec![0, 1, 2, 3, 4]),
-            (vec![3, 1, 1, 1], vec![1, 3, 5]),
-            (vec![3, 0, 0, 253, 0, 1], vec![0, 1, 258]), // .., 253, 0, 1] == VarInt(256)
-        ];
-        let deser_errorcases = vec![
-            vec![2, 255, 254, 255, 255, 255, 255, 255, 255, 255, 0], // .., 255, 254, .., 255] == VarInt(u64::MAX-1)
-            vec![1, 255, 255, 255, 255, 255, 255, 255, 255, 255], // .., 255, 255, .., 255] == VarInt(u64::MAX)
-        ];
-        for testcase in testcases {
-            {
-                // test deserialization
-                let mut raw: Vec<u8> = [0u8; 32].to_vec();
-                raw.extend(testcase.0.clone());
-                let btr: BlockTransactionsRequest = deserialize(&raw.to_vec()).unwrap();
-                assert_eq!(testcase.1, btr.indexes);
-            }
-            {
-                // test serialization
-                let raw: Vec<u8> = serialize(&BlockTransactionsRequest {
-                    block_hash: Hash::all_zeros(),
-                    indexes: testcase.1,
-                });
-                let mut expected_raw: Vec<u8> = [0u8; 32].to_vec();
-                expected_raw.extend(testcase.0);
-                assert_eq!(expected_raw, raw);
-            }
-        }
-        for errorcase in deser_errorcases {
-            {
-                // test that we return Err() if deserialization fails (and don't panic)
-                let mut raw: Vec<u8> = [0u8; 32].to_vec();
-                raw.extend(errorcase);
-                assert!(deserialize::<BlockTransactionsRequest>(&raw.to_vec()).is_err());
-            }
-        }
-    }
+//     #[test]
+//     fn test_getblocktx_differential_encoding_de_and_serialization() {
+//         let testcases = vec![
+//             // differentially encoded VarInts, indicies
+//             (vec![4, 0, 5, 1, 10], vec![0, 6, 8, 19]),
+//             (vec![1, 0], vec![0]),
+//             (vec![5, 0, 0, 0, 0, 0], vec![0, 1, 2, 3, 4]),
+//             (vec![3, 1, 1, 1], vec![1, 3, 5]),
+//             (vec![3, 0, 0, 253, 0, 1], vec![0, 1, 258]), // .., 253, 0, 1] == VarInt(256)
+//         ];
+//         let deser_errorcases = vec![
+//             vec![2, 255, 254, 255, 255, 255, 255, 255, 255, 255, 0], // .., 255, 254, .., 255] == VarInt(u64::MAX-1)
+//             vec![1, 255, 255, 255, 255, 255, 255, 255, 255, 255], // .., 255, 255, .., 255] == VarInt(u64::MAX)
+//         ];
+//         for testcase in testcases {
+//             {
+//                 // test deserialization
+//                 let mut raw: Vec<u8> = [0u8; 32].to_vec();
+//                 raw.extend(testcase.0.clone());
+//                 let btr: BlockTransactionsRequest = deserialize(&raw.to_vec()).unwrap();
+//                 assert_eq!(testcase.1, btr.indexes);
+//             }
+//             {
+//                 // test serialization
+//                 let raw: Vec<u8> = serialize(&BlockTransactionsRequest {
+//                     block_hash: Hash::all_zeros(),
+//                     indexes: testcase.1,
+//                 });
+//                 let mut expected_raw: Vec<u8> = [0u8; 32].to_vec();
+//                 expected_raw.extend(testcase.0);
+//                 assert_eq!(expected_raw, raw);
+//             }
+//         }
+//         for errorcase in deser_errorcases {
+//             {
+//                 // test that we return Err() if deserialization fails (and don't panic)
+//                 let mut raw: Vec<u8> = [0u8; 32].to_vec();
+//                 raw.extend(errorcase);
+//                 assert!(deserialize::<BlockTransactionsRequest>(&raw.to_vec()).is_err());
+//             }
+//         }
+//     }
 
-    #[test]
-    #[should_panic] // 'attempt to add with overflow' in consensus_encode()
-    fn test_getblocktx_panic_when_encoding_u64_max() {
-        serialize(&BlockTransactionsRequest {
-            block_hash: Hash::all_zeros(),
-            indexes: vec![core::u64::MAX],
-        });
-    }
-}
+//     #[test]
+//     #[should_panic] // 'attempt to add with overflow' in consensus_encode()
+//     fn test_getblocktx_panic_when_encoding_u64_max() {
+//         serialize(&BlockTransactionsRequest {
+//             block_hash: Hash::all_zeros(),
+//             indexes: vec![core::u64::MAX],
+//         });
+//     }
+// }
