@@ -213,7 +213,7 @@ impl fmt::Display for Network {
         use Network::*;
 
         let s = match *self {
-            Bellscoin => "mainner",
+            Bellscoin => "mainnet",
             Testnet => "testnet",
             Signet => "signet",
             Regtest => "regtest",
