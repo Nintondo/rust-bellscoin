@@ -1,6 +1,6 @@
 [package]
 name = "bellscoin"
-version = "0.30.7"
+version = "0.30.8"
 authors = ["Nintondo"]
 license = "CC0-1.0"
 homepage = "https://github.com/Nintondo/rust-bellscoin/"
